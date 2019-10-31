@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#000"
+    android:theme="@style/Theme.MaterialComponents"
+    tools:context=".SearchTube"
+    android:orientation="vertical">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/shimmer_recycler_view"
+        android:layout_width="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:shimmer_demo_duration="@integer/config_navAnimTime"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        app:shimmer_demo_child_count="10"
+        app:shimmer_demo_shimmer_color="@color/white"
+        app:shimmer_demo_layout="@layout/youtuberow"
+        app:shimmer_demo_layout_manager_type="linear_vertical" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:lottie_autoPlay="true"
+        app:lottie_fileName="loader.json"
+        app:lottie_loop="true"
+        android:id="@+id/loader_lottie"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_search" />
+</FrameLayout>

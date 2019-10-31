@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.SearchView.OnQueryTextListener;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -26,6 +29,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,6 +46,8 @@ import com.android.volley.toolbox.Volley;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.YouTubeMetaDataCrawler;
 import com.example.YoutubeVideos;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.iammert.library.ui.multisearchviewlib.MultiSearchView;
 
 import org.json.JSONObject;
@@ -66,26 +73,34 @@ import java.util.regex.PatternSyntaxException;
 import static com.android.volley.Request.Method.GET;
 public class SearchTube extends AppCompatActivity {
     List<String> getresults = new ArrayList<>();
-ShimmerRecyclerView shimmer_recycler_view;
-YoutubeAdapter adapter;
-ListView list_search;
+    RecyclerView shimmer_recycler_view;
+    public static List<YoutubeVideos> savedvideos = new ArrayList<>();
+    public static SharedPreferences sharedPreferences;
+    public static SharedPreferences.Editor editor;
+    YoutubeAdapter adapter;
+    ListView list_search;
     SearchView   searchView;
     List<YoutubeVideos> youtubeVideosList = new ArrayList<>();
     LottieAnimationView lottieAnimationView;
-    @SuppressLint({"CutPasteId", "NewApi"})
+    @SuppressLint({"CutPasteId", "NewApi", "CommitPrefEdits"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_tube);
-        getSupportActionBar().setBackgroundDrawable(
-                new ColorDrawable(Color.parseColor("#66000000")));
+        sharedPreferences = getSharedPreferences("savedvideos",0);
+        editor = sharedPreferences.edit();
+        if(!sharedPreferences.getString("savedvideos","null").equalsIgnoreCase("null"))
+        {
+            savedvideos =new Gson().fromJson(sharedPreferences.getString("savedvideos","null"), new TypeToken<List<YoutubeVideos>>(){}.getType());
+        }
+        getWindow().setStatusBarColor(ContextCompat.getColor(SearchTube.this ,R.color.black));
+        Objects.requireNonNull(getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(Color.parseColor("#66000000")));
         list_search= findViewById(R.id.list_search);
         lottieAnimationView = findViewById(R.id.loader_lottie);
         lottieAnimationView.animate();
         getSupportActionBar().setTitle("");  // provide compatibility to all the versions
         Toast.makeText(this, "Developed By Raj Kavadia", Toast.LENGTH_SHORT).show();
         shimmer_recycler_view = findViewById(R.id.shimmer_recycler_view);
-        shimmer_recycler_view.showShimmerAdapter();
         shimmer_recycler_view.animate();
 
         @SuppressLint("WrongConstant") LinearLayoutManager manager = new LinearLayoutManager(SearchTube.this, OrientationHelper.VERTICAL, false);
@@ -137,11 +152,13 @@ ListView list_search;
                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                            searchyoutube(getresults.get(position));
                                            list_search.setAdapter(null);
+                                           hideKeyboard(SearchTube.this);
                                        }
                                    });
                                    list_search.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                        @Override
                                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                           hideKeyboard(SearchTube.this);
                                            searchyoutube(getresults.get(position));
                                            searchView.clearFocus();
                                            searchView.setQuery(getresults.get(position),false);
@@ -195,6 +212,12 @@ ListView list_search;
                             if(doc.body().hasText()){
                                 try {
                                     String title = ymc.getTitle(doc);
+                                    if(title==null){
+                                        continue;
+                                    }
+                                    if(title.length()==0 ){
+                                        continue;
+                                    }
                                     String desc = ymc.getDesc(doc);
                                     String views = ymc.getViews(doc);
                                     String subscribed = String.valueOf(ymc.getPeopleSubscribed(doc));
@@ -248,20 +271,7 @@ ListView list_search;
         }
         return data;
     }
-    public static String getTitleQuietly(String youtubeUrl) {
-        try {
-            if (youtubeUrl != null) {
-                URL embededURL = new URL("http://www.youtube.com/oembed?url=" +
-                        youtubeUrl + "&format=json"
-                );
 
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
@@ -337,4 +347,5 @@ ListView list_search;
         }
         return bitmap;
     }
+
 }
