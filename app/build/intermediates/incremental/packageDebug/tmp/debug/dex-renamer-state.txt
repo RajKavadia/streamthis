@@ -1,0 +1,4 @@
+#Wed May 06 20:34:01 PDT 2020
+base.0=C\:\\Users\\raj\\Downloads\\YoutubeStream-master\\YoutubeStream-master\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
